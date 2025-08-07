@@ -63,15 +63,18 @@ def upload_image_to_whatsapp(wa_id, filepath=None):
     image.save(img_bytes, format='JPEG')
     img_bytes.seek(0)
 
-    url = f"https://graph.facebook.com/v18.0/{wa_id}/media"
     headers = {
-        "Authorization": f"Bearer {current_app.config['ACCESS_TOKEN']}"
+        "Content-type": "application/json",
+        "Authorization": f"Bearer {current_app.config['ACCESS_TOKEN']}",
     }
-    files = {
+
+    url = f"https://graph.facebook.com/{current_app.config['VERSION']}/{current_app.config['PHONE_NUMBER_ID']}/media"
+
+    files = json.dumps({
         'file': ('image.jpg', img_bytes, "image/jpeg"),
         'type': (None, 'image/jpeg'),
         'messaging_product': (None, 'whatsapp')
-    }
+    })
 
     response = requests.post(url, headers=headers, files=files)
     print(response.status_code, response.text)
