@@ -75,22 +75,71 @@ def process_text_for_whatsapp(text):
     return whatsapp_style_text
 
 
+# def process_whatsapp_message(body):
+#     wa_id = body["entry"][0]["changes"][0]["value"]["contacts"][0]["wa_id"]
+#     name = body["entry"][0]["changes"][0]["value"]["contacts"][0]["profile"]["name"]
+
+#     message = body["entry"][0]["changes"][0]["value"]["messages"][0]
+#     message_body = message["text"]["body"]
+
+#     # TODO: implement custom function here
+#     response = generate_response(message_body)
+
+#     # OpenAI Integration
+#     # response = generate_response(message_body, wa_id, name)
+#     # response = process_text_for_whatsapp(response)
+
+#     data = get_text_message_input(current_app.config["RECIPIENT_WAID"], response)
+#     send_message(data)
+
 def process_whatsapp_message(body):
     wa_id = body["entry"][0]["changes"][0]["value"]["contacts"][0]["wa_id"]
     name = body["entry"][0]["changes"][0]["value"]["contacts"][0]["profile"]["name"]
 
-    message = body["entry"][0]["changes"][0]["value"]["messages"][0]
-    message_body = message["text"]["body"]
+    # 1. Send greeting text
+    greeting_text = (
+        f"Hello {name}, I am the Uliza-WI chatbot. I can give you advice on weather-dependent farming practices.\n"
+        "How may I assist you?"
+    )
+    greeting_data = get_text_message_input(wa_id, greeting_text)
+    send_message(greeting_data)
 
-    # TODO: implement custom function here
-    response = generate_response(message_body)
+    # 2. Send interactive button menu
+    menu_data = get_interactive_menu_input(wa_id)
+    send_message(menu_data)
 
-    # OpenAI Integration
-    # response = generate_response(message_body, wa_id, name)
-    # response = process_text_for_whatsapp(response)
-
-    data = get_text_message_input(current_app.config["RECIPIENT_WAID"], response)
-    send_message(data)
+def get_interactive_menu_input(recipient):
+    return json.dumps(
+        {
+            "messaging_product": "whatsapp",
+            "to": recipient,
+            "type": "interactive",
+            "interactive": {
+                "type": "button",
+                "body": {
+                    "text": "Please choose an option:"
+                },
+                "action": {
+                    "buttons": [
+                        {
+                            "type": "reply",
+                            "reply": {
+                                "id": "weather_forecast",
+                                "title": "Weather Forecast"
+                            },
+                        },
+                        {
+                            "type": "reply",
+                            "reply": {
+                                "id": "farming_advice",
+                                "title": "Farming Advice"
+                            },
+                        },
+                    ]
+                },
+            },
+        }
+    )
 
 
 def is_valid_whatsapp_message(body):
