@@ -70,17 +70,37 @@ def upload_image_to_whatsapp(wa_id, filepath=None):
 
     url = f"https://graph.facebook.com/{current_app.config['VERSION']}/{current_app.config['PHONE_NUMBER_ID']}/media"
 
-    files = json.dumps({
+    files = {
         'file': ('image.jpg', img_bytes, "image/jpeg"),
         'type': (None, 'image/jpeg'),
         'messaging_product': (None, 'whatsapp')
-    })
+    }
 
     response = requests.post(url, headers=headers, files=files)
     print(response.status_code, response.text)
     return response.json().get("id")
 
+def send_uploaded_image(recipient, media_id, caption=None):
+    url = f"https://graph.facebook.com/v18.0/{PHONE_NUMBER_ID}/messages"
+    headers = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
+        "Content-Type": "application/json"
+    }
 
+    data = {
+        "messaging_product": "whatsapp",
+        "to": recipient,
+        "type": "image",
+        "image": {
+            "id": media_id
+        }
+    }
+
+    if caption:
+        data["image"]["caption"] = caption
+
+    r = requests.post(url, headers=headers, json=data)
+    print(r.status_code, r.text)
 
 def send_message(data):
     headers = {
@@ -141,11 +161,12 @@ def process_whatsapp_message(body):
     # # response = generate_response(message_body, wa_id, name)
     # # response = process_text_for_whatsapp(response)
     image_file_id = upload_image_to_whatsapp(wa_id, filepath=None)
+    send_uploaded_image(wa_id, image_file_id, caption = response)
     #image_url = 'https://tse1.mm.bing.net/th/id/OIP.u1ari3GNIE25ycACMb3tUgHaGi?r=0&pid=Apiv'
-    data = get_picture_input(wa_id,image_url = image_file_id, caption = response)
+    #data = get_picture_input(wa_id,image_url = image_file_id, caption = response)
     # send_message(data)
     
-    send_message(data)
+    #send_message(data)
 
 
 def is_valid_whatsapp_message(body):
