@@ -150,6 +150,7 @@ def process_whatsapp_message(body):
     # # response = generate_response(message_body, wa_id, name)
     # # response = process_text_for_whatsapp(response)
     image_url = 'https://python-whatsapp-bot-3.onrender.com/static/Raincloud (1).jpg'
+    image_url = 'https://tse1.mm.bing.net/th/id/OIP.u1ari3GNIE25ycACMb3tUgHaGi?r=0&pid=Apiv'
     data = get_picture_input(wa_id,image_url = image_url, caption = response)
     # send_message(data)
     
