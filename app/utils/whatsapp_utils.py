@@ -81,24 +81,32 @@ def upload_image_to_whatsapp(wa_id, filepath=None):
     return response.json().get("id")
 
 def send_uploaded_image(recipient, media_id, caption=None):
-    url = f"https://graph.facebook.com/v18.0/{PHONE_NUMBER_ID}/messages"
+    url = f"https://graph.facebook.com/v18.0/{current_app.config['PHONE_NUMBER_ID']}/messages"
     headers = {
-        "Authorization": f"Bearer {ACCESS_TOKEN}",
+        "Authorization": f"Bearer {current_app.config['ACCESS_TOKEN']}",
         "Content-Type": "application/json"
     }
 
-    data = {
+    if caption:
+        data = {
         "messaging_product": "whatsapp",
         "to": recipient,
         "type": "image",
         "image": {
-            "id": media_id
+            "id": media_id,
+            'caption':caption
         }
     }
-
-    if caption:
-        data["image"]["caption"] = caption
-
+    else:
+        data = {
+        "messaging_product": "whatsapp",
+        "to": recipient,
+        "type": "image",
+        "image": {
+            "id": media_id 
+        }
+    }
+      
     r = requests.post(url, headers=headers, json=data)
     print(r.status_code, r.text)
 
