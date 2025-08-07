@@ -24,6 +24,28 @@ def get_text_message_input(recipient, text):
         }
     )
 
+def get_picture_input(recipient, image_url, caption=None):
+    if caption:
+           
+        return json.dumps(
+            {
+                "messaging_product": "whatsapp",
+                "recipient_type": "individual",
+                "to": recipient,
+                "type": "image",
+                "image": {"link": image_url, 'caption': caption},
+            }
+        )
+    else:
+        return json.dumps(
+            {
+                "messaging_product": "whatsapp",
+                "recipient_type": "individual",
+                "to": recipient,
+                "type": "image",
+                "image": {"link": image_url},
+            }
+        )
 
 def generate_response(response):
     # Return text in uppercase
@@ -127,11 +149,11 @@ def process_whatsapp_message(body):
     # # OpenAI Integration
     # # response = generate_response(message_body, wa_id, name)
     # # response = process_text_for_whatsapp(response)
-
-    data = get_text_message_input(current_app.config["RECIPIENT_WAID"], response)
-    # send_message(data)
     image_url = 'https://python-whatsapp-bot-3.onrender.com/static/Raincloud (1).jpg'
-    send_picture(data,image_url = image_url, caption =response)
+    data = get_picture_input(wa_id,image_url = image_url, caption = response)
+    # send_message(data)
+    
+    send_message(data)
 
 
 def is_valid_whatsapp_message(body):
