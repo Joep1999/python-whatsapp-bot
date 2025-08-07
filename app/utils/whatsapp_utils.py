@@ -128,7 +128,7 @@ def process_whatsapp_message(body):
     # # response = generate_response(message_body, wa_id, name)
     # # response = process_text_for_whatsapp(response)
 
-    # data = get_text_message_input(current_app.config["RECIPIENT_WAID"], response)
+    data = get_text_message_input(current_app.config["RECIPIENT_WAID"], response)
     # send_message(data)
     image_url = 'https://python-whatsapp-bot-3.onrender.com/static/Raincloud (1).jpg'
     send_picture(data,image_url = image_url, caption =response)
