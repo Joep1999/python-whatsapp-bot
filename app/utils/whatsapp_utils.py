@@ -6,6 +6,9 @@ import requests
 # from app.services.openai_service import generate_response
 import re
 
+from PIL import Image
+
+
 
 def log_http_response(response):
     logging.info(f"Status: {response.status_code}")
@@ -33,7 +36,7 @@ def get_picture_input(recipient, image_url, caption=None):
                 "recipient_type": "individual",
                 "to": recipient,
                 "type": "image",
-                "image": {"link": image_url, 'caption': caption},
+                "image": {"id": image_url, 'caption': caption},
             }
         )
     else:
@@ -43,7 +46,7 @@ def get_picture_input(recipient, image_url, caption=None):
                 "recipient_type": "individual",
                 "to": recipient,
                 "type": "image",
-                "image": {"link": image_url},
+                "image": {"id": image_url},
             }
         )
 
@@ -51,44 +54,29 @@ def generate_response(response):
     # Return text in uppercase
     return response.upper()
 
-def send_picture(data, image_url, caption=None):
-    
+import requests
+
+def upload_image_to_whatsapp(wa_id, filepath=None):
+
+    image = Image.new('RGB', (300, 200), color='blue')  # a dummy blue image
+    img_bytes = io.BytesIO()
+    image.save(img_bytes, format='JPEG')
+    img_bytes.seek(0)
+
+    url = f"https://graph.facebook.com/v18.0/{wa_id}/media"
     headers = {
-        "Content-type": "application/json",
-        "Authorization": f"Bearer {current_app.config['ACCESS_TOKEN']}",
+        "Authorization": f"Bearer {current_app.config['ACCESS_TOKEN']}"
+    }
+    files = {
+        'file': ('image.jpg', img_bytes, "image/jpeg"),
+        'type': (None, 'image/jpeg'),
+        'messaging_product': (None, 'whatsapp')
     }
 
-    url = f"https://graph.facebook.com/{current_app.config['VERSION']}/{current_app.config['PHONE_NUMBER_ID']}/messages"
+    response = requests.post(url, headers=headers, files=files)
+    print(response.status_code, response.text)
+    return response.json().get("id")
 
-    payload = {
-            "messaging_product": "whatsapp",
-            "to": current_app.config['PHONE_NUMBER_ID'],
-            "type": "image",
-            "image": {
-                "link": image_url
-            }
-        }
-    if caption:
-            payload["image"]["caption"] = caption
-
-    try:
-        response = requests.post(url,data = data, headers=headers, json=payload,  timeout=10)
-        # response = requests.post(
-        #     url, data=data, headers=headers, timeout=10
-        # )  # 10 seconds timeout as an example
-        response.raise_for_status()  # Raises an HTTPError if the HTTP request returned an unsuccessful status code
-    except requests.Timeout:
-        logging.error("Timeout occurred while sending message")
-        return jsonify({"status": "error", "message": "Request timed out"}), 408
-    except (
-        requests.RequestException
-    ) as e:  # This will catch any general request exception
-        logging.error(f"Request failed due to: {e}")
-        return jsonify({"status": "error", "message": "Failed to send message"}), 500
-    else:
-        # Process the response as normal
-        log_http_response(response)
-        return response
 
 
 def send_message(data):
@@ -149,9 +137,9 @@ def process_whatsapp_message(body):
     # # OpenAI Integration
     # # response = generate_response(message_body, wa_id, name)
     # # response = process_text_for_whatsapp(response)
-    image_url = 'https://python-whatsapp-bot-3.onrender.com/static/Raincloud.jpg'
+    image_file_id = upload_image_to_whatsapp(wa_id, filepath=None)
     #image_url = 'https://tse1.mm.bing.net/th/id/OIP.u1ari3GNIE25ycACMb3tUgHaGi?r=0&pid=Apiv'
-    data = get_picture_input(wa_id,image_url = image_url, caption = response)
+    data = get_picture_input(wa_id,image_url = image_file_id, caption = response)
     # send_message(data)
     
     send_message(data)
