@@ -131,7 +131,7 @@ def process_whatsapp_message(body):
     # data = get_text_message_input(current_app.config["RECIPIENT_WAID"], response)
     # send_message(data)
     image_url = 'https://python-whatsapp-bot-3.onrender.com/static/Raincloud (1).jpg'
-    send_image(data,image_url = image_url, caption =response)
+    send_picture(data,image_url = image_url, caption =response)
 
 
 def is_valid_whatsapp_message(body):
