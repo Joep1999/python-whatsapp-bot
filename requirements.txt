@@ -4,4 +4,3 @@ openai
 aiohttp
 requests
 pillow
-io
