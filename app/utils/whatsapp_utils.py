@@ -29,6 +29,45 @@ def generate_response(response):
     # Return text in uppercase
     return response.upper()
 
+def send_picture(data, image_url, caption=None):
+    
+    headers = {
+        "Content-type": "application/json",
+        "Authorization": f"Bearer {current_app.config['ACCESS_TOKEN']}",
+    }
+
+    url = f"https://graph.facebook.com/{current_app.config['VERSION']}/{current_app.config['PHONE_NUMBER_ID']}/messages"
+
+    payload = {
+            "messaging_product": "whatsapp",
+            "to": current_app.config['PHONE_NUMBER_ID'],
+            "type": "image",
+            "image": {
+                "link": image_url
+            }
+        }
+    if caption:
+            payload["image"]["caption"] = caption
+
+    try:
+        response = requests.post(url,data = data, headers=headers, json=payload,  timeout=10)
+        # response = requests.post(
+        #     url, data=data, headers=headers, timeout=10
+        # )  # 10 seconds timeout as an example
+        response.raise_for_status()  # Raises an HTTPError if the HTTP request returned an unsuccessful status code
+    except requests.Timeout:
+        logging.error("Timeout occurred while sending message")
+        return jsonify({"status": "error", "message": "Request timed out"}), 408
+    except (
+        requests.RequestException
+    ) as e:  # This will catch any general request exception
+        logging.error(f"Request failed due to: {e}")
+        return jsonify({"status": "error", "message": "Failed to send message"}), 500
+    else:
+        # Process the response as normal
+        log_http_response(response)
+        return response
+
 
 def send_message(data):
     headers = {
@@ -82,15 +121,17 @@ def process_whatsapp_message(body):
     message = body["entry"][0]["changes"][0]["value"]["messages"][0]
     message_body = message["text"]["body"]
 
-    # TODO: implement custom function here
+    # # TODO: implement custom function here
     response = generate_response(message_body)
 
-    # OpenAI Integration
-    # response = generate_response(message_body, wa_id, name)
-    # response = process_text_for_whatsapp(response)
+    # # OpenAI Integration
+    # # response = generate_response(message_body, wa_id, name)
+    # # response = process_text_for_whatsapp(response)
 
-    data = get_text_message_input(current_app.config["RECIPIENT_WAID"], response)
-    send_message(data)
+    # data = get_text_message_input(current_app.config["RECIPIENT_WAID"], response)
+    # send_message(data)
+    image_url = 'https://python-whatsapp-bot-3.onrender.com/static/Raincloud (1).jpg'
+    send_image(data,image_url = image_url, caption =response)
 
 
 def is_valid_whatsapp_message(body):
