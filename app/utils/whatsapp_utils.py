@@ -96,17 +96,49 @@ def process_whatsapp_message(body):
     wa_id = body["entry"][0]["changes"][0]["value"]["contacts"][0]["wa_id"]
     name = body["entry"][0]["changes"][0]["value"]["contacts"][0]["profile"]["name"]
 
-    # 1. Send greeting text
-    greeting_text = (
-        f"Hello {name}, I am the Uliza-WI chatbot. I can give you advice on weather-dependent farming practices.\n"
-        "How may I assist you?"
-    )
-    greeting_data = get_text_message_input(wa_id, greeting_text)
-    send_message(greeting_data)
+    message = body["entry"][0]["changes"][0]["value"]["messages"][0]
+    message_type = message.get("type")
 
-    # 2. Send interactive button menu
-    menu_data = get_interactive_menu_input(wa_id)
-    send_message(menu_data)
+    if message_type == "text":
+        # User sent a normal message – send greeting and menu
+        greeting_text = (
+            f"Hello {name}, I am the Uliza-WI chatbot. I can give you advice on weather-dependent farming practices.\n"
+            "How may I assist you?"
+        )
+        greeting_data = get_text_message_input(wa_id, greeting_text)
+        send_message(greeting_data)
+
+        menu_data = get_interactive_menu_input(wa_id)
+        send_message(menu_data)
+
+    elif message_type == "interactive":
+        interactive_type = message["interactive"]["type"]
+        if interactive_type == "button_reply":
+            button_id = message["interactive"]["button_reply"]["id"]
+
+            if button_id == "weather_forecast":
+                reply_text = "Please share your location or let me know your region so I can fetch the weather forecast for you."
+
+            elif button_id == "farming_advice":
+                reply_text = "Please tell me your crop and current situation so I can give tailored farming advice."
+
+            else:
+                reply_text = "Sorry, I didn’t understand that option. Please try again."
+
+            data = get_text_message_input(wa_id, reply_text)
+            send_message(data)
+
+        else:
+            # Future-proof: other interactive types like list_reply
+            unknown_text = "Sorry, I couldn't process your selection."
+            data = get_text_message_input(wa_id, unknown_text)
+            send_message(data)
+
+    else:
+        # Unsupported message types like images, voice, etc.
+        error_text = "Sorry, I can only understand text and menu selections for now."
+        data = get_text_message_input(wa_id, error_text)
+        send_message(data)
 
 def get_interactive_menu_input(recipient):
     return json.dumps(
@@ -125,14 +157,14 @@ def get_interactive_menu_input(recipient):
                             "type": "reply",
                             "reply": {
                                 "id": "weather_forecast",
-                                "title": "Weather Forecast"
+                                "title": "🌤️ Weather Forecast"
                             },
                         },
                         {
                             "type": "reply",
                             "reply": {
                                 "id": "farming_advice",
-                                "title": "Farming Advice"
+                                "title": "🌱 Farming Advice"
                             },
                         },
                     ]
