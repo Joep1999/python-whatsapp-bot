@@ -17,11 +17,15 @@ def route_message(message):
                 return weather_forecast.handle_weather_request(message)
             elif button_id == "farming_advice":
                 return farming_advice.handle_farming_request(message)
-
-        elif message.get("type") == "text":
+        else:
+            return fallback.handle_unknown(message)
+    else:
+        if message.get("type") == "text":
             if state == "AWAITING_WEATHER_LOCATION":
                 return weather_forecast.handle_location_input(message)
             elif state == "AWAITING_CROP_INFO":
                 return farming_advice.handle_crop_input(message)
             else:
                 return fallback.handle_unknown(message)
+        else:
+            return fallback.handle_unknown(message)
