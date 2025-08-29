@@ -18,7 +18,7 @@ def handle_location_input(message):
     wa_id = message["from"]
     location = message["text"]["body"]
 
-    reply = f"Got it! Howeverm, to check the weather for *{location}* you need to share the location using Whatsapp interface!"
+    reply = f"Got it! However, to check the weather for *{location}* you need to share the location using Whatsapp interface!"
     data = get_text_message_input(wa_id, reply)
     send_message(data)
 
@@ -30,8 +30,8 @@ def handle_location_share(message):
     from app.utils.whatsapp_utils import get_text_message_input, send_message
     wa_id = message["from"]
     location = message["location"]
-    location_name = message["name"]
-    location_address = message["address"]
+    location_name = location["name"]
+    location_address = location["address"]
 
     latitude = location["latitude"]
     longitude = location["longitude"]
