@@ -2,12 +2,13 @@ from app.session.session_store import set_user_state, clear_user_state
 
 
 def handle_weather_request(message):
-    from app.utils.whatsapp_utils import get_text_message_input, send_message, send_location_request
+    from app.utils.whatsapp_utils import get_text_message_input, send_message, get_location_request
     wa_id = message["from"]
 
     # Ask for location
     text = "Please share with me your location 🌍 so I can check the forecast."
-    send_location_request(text)
+    location_request_data = get_location_request(wa_id, text)
+    send_message(location_request_data)
 
     # Update user state
     set_user_state(wa_id, "AWAITING_WEATHER_LOCATION")
@@ -29,8 +30,8 @@ def handle_location_share(message):
     from app.utils.whatsapp_utils import get_text_message_input, send_message
     wa_id = message["from"]
     location = message["location"]
-    # location_name = location["name"]
-    # location_address = location["address"]
+    location_name = location["name"]
+    location_address = location["address"]
 
     latitude = location["latitude"]
     longitude = location["longitude"]
