@@ -30,13 +30,19 @@ def handle_location_share(message):
     from app.utils.whatsapp_utils import get_text_message_input, send_message
     wa_id = message["from"]
     location = message["location"]
-    location_name = location["name"]
-    location_address = location["address"]
+    location_name = location.get("name", "Unknown location")
+    location_address = location.get("address", "")
 
     latitude = location["latitude"]
     longitude = location["longitude"]
 
-    reply = f"📍 Got your location!\nLatitude: {latitude}, Longitude: {longitude}\nName: {location_name}\nAddress: {location_address}\nChecking weather... ☁️"
+    reply = f"📍 Got your location!\nLatitude: {latitude}, Longitude: {longitude}"
+    if location_name != "Unknown location":
+        reply += f"\nPlace: {location_name}"
+    if location_address:
+        reply += f"\nAddress: {location_address}"
+    reply += "\nChecking weather... ☁️"
+    
     data = get_text_message_input(wa_id, reply)
     send_message(data)
 
