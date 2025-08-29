@@ -27,5 +27,12 @@ def route_message(message):
                 return farming_advice.handle_crop_input(message)
             else:
                 return fallback.handle_unknown(message)
+            
+        elif message.get("type") == "location":
+            if state == "AWAITING_WEATHER_LOCATION":
+                return weather_forecast.handle_location_share(message)
+            else:
+                return fallback.handle_unknown(message)
+            
         else:
             return fallback.handle_unknown(message)
