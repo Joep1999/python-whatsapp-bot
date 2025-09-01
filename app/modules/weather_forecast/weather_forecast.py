@@ -1,5 +1,4 @@
 from app.session.session_store import set_user_state, clear_user_state
-from app.modules.tts import text_to_speech_converter
 
 
 def handle_weather_request(message):
