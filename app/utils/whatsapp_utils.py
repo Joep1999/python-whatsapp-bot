@@ -1,10 +1,12 @@
 import logging
 from flask import current_app, jsonify
 from app.router.message_router import route_message
+from app.utils.texttospeech import text_to_speech_converter
 import json
 import requests
 import re
 
+GRAPH_URL = "https://graph.facebook.com/v20.0"
 
 def log_http_response(response):
     logging.info(f"Status: {response.status_code}")
@@ -110,3 +112,48 @@ def get_location_request(recipient, text):
         }
     }
     )
+
+def send_audio_message(wa_id, media_id):
+    url = f"{GRAPH_URL}/{current_app.config['PHONE_NUMBER_ID']}/messages"
+    headers = {
+        "Authorization": f"Bearer {current_app.config['ACCESS_TOKEN']}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": wa_id,
+        "type": "audio",
+        "audio": {"id": media_id}
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+    response.raise_for_status()
+    return response.json()
+
+
+
+def upload_media(file_path):
+    url = f"{GRAPH_URL}/{current_app.config['PHONE_NUMBER_ID']}/media"
+    headers = {"Authorization": f"Bearer {current_app.config['ACCESS_TOKEN']}"}
+    files = {
+        "file": (file_path, open(file_path, "rb"), "audio/mpeg"),
+    }
+    data = {
+        "messaging_product": "whatsapp",
+        "type": "audio/mpeg",
+    }
+
+    response = requests.post(url, headers=headers, files=files, data=data)
+    response.raise_for_status()
+    media_id = response.json()["id"]
+    return media_id
+
+def send_tts_message(wa_id, text):
+    # 1. Convert text → speech
+    filename = text_to_speech_converter(text, filename=f"tts_{wa_id}.mp3")
+
+    # 2. Upload MP3 to WhatsApp Cloud API
+    media_id = upload_media(filename)
+
+    # 3. Send voice message
+    send_audio_message(wa_id, media_id)
