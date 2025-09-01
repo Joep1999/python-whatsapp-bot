@@ -1,4 +1,5 @@
 from app.session.session_store import set_user_state, clear_user_state
+from app.utils.text_utils import remove_emojis
 
 
 def handle_weather_request(message):
@@ -11,7 +12,7 @@ def handle_weather_request(message):
     send_message(location_request_data)
 
     # Send voice message
-    send_tts_message(wa_id ,reply)
+    send_tts_message(wa_id ,remove_emojis(reply))
 
     # Update user state
     set_user_state(wa_id, "AWAITING_WEATHER_LOCATION")
@@ -25,7 +26,7 @@ def handle_location_input(message):
     data = get_text_message_input(wa_id, reply)
     send_message(data)
     # Send voice message
-    send_tts_message(wa_id ,reply)
+    send_tts_message(wa_id ,remove_emojis(reply))
 
     # Call weather API here...
 
@@ -52,7 +53,7 @@ def handle_location_share(message):
     send_message(data)
 
     # Send voice message
-    send_tts_message(wa_id ,reply)
+    send_tts_message(wa_id ,remove_emojis(reply))
 
     # Call your weather API here with (latitude, longitude)
     # weather = get_weather_by_coords(latitude, longitude)

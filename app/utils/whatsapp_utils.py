@@ -157,3 +157,43 @@ def send_tts_message(wa_id, text):
 
     # 3. Send voice message
     send_audio_message(wa_id, media_id)
+
+
+def get_interactive_menu_input(recipient, text, buttons_dict):
+    """
+    Build a WhatsApp interactive button menu dynamically.
+
+    Args:
+        recipient (str): WhatsApp ID of the recipient.
+        text (str): Body text for the menu.
+        buttons_dict (dict): Dictionary {id: title} for the buttons.
+
+    Returns:
+        str: JSON payload for WhatsApp API.
+    """
+    buttons = []
+    for btn_id, title in buttons_dict.items():
+        buttons.append({
+            "type": "reply",
+            "reply": {
+                "id": btn_id,
+                "title": title
+            }
+        })
+
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": recipient,
+        "type": "interactive",
+        "interactive": {
+            "type": "button",
+            "body": {
+                "text": text
+            },
+            "action": {
+                "buttons": buttons
+            }
+        }
+    }
+
+    return json.dumps(payload)
