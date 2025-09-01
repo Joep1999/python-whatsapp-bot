@@ -123,7 +123,9 @@ def send_audio_message(wa_id, media_id):
         "messaging_product": "whatsapp",
         "to": wa_id,
         "type": "audio",
-        "audio": {"id": media_id}
+        "audio": {
+            "id": media_id,
+            "voice": True}
     }
 
     response = requests.post(url, headers=headers, json=payload)
