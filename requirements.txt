@@ -3,4 +3,5 @@ python-dotenv
 openai
 aiohttp
 requests
+google-auth
 google-cloud-texttospeech

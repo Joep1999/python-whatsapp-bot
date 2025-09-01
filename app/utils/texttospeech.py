@@ -1,6 +1,16 @@
 from google.cloud import texttospeech
+from google.oauth2 import service_account
+import os
+import json
 
-client = texttospeech.TextToSpeechClient.from_service_account_json('/home/app/utils/env_file/Uliza-WI_texttospeech_GoogleAPI_key.json')
+# Load credentials JSON from env var
+GOOGLE_CREDENTIALS = json.loads(os.environ["GOOGLE_CREDENTIALS"])
+
+# Build credentials object
+credentials = service_account.Credentials.from_service_account_info(GOOGLE_CREDENTIALS)
+
+# Initialize client
+client = texttospeech.TextToSpeechClient(credentials=credentials)
 
 def text_to_speech_converter(text, filename="output.mp3"):
     input_text = texttospeech.SynthesisInput(text=text)
