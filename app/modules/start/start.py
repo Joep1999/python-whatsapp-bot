@@ -12,7 +12,7 @@ def handle_first_message(message):
     data = get_text_message_input(wa_id, greeting_text)
     send_message(data)
     # Send voice message
-    send_tts_message(wa_id ,reply)
+    send_tts_message(wa_id ,greeting_text)
 
     reply = 'Please choose an option:'
     buttons = {'weather_forecast':'🌤️ Weather Forecast',
