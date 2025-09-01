@@ -1,6 +1,6 @@
 from google.cloud import texttospeech
 
-client = texttospeech.TextToSpeechClient.from_service_account_json('//192.168.11.40/wi-dev/personal_data/lorenzo/whatsapp chatbot/tetx-to-speach/Uliza-WI_texttospeech_GoogleAPI_key.json')
+client = texttospeech.TextToSpeechClient.from_service_account_json('/home/app/utils/env_file/Uliza-WI_texttospeech_GoogleAPI_key.json')
 
 def text_to_speech_converter(text, filename="output.mp3"):
     input_text = texttospeech.SynthesisInput(text=text)
