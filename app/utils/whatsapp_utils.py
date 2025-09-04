@@ -132,6 +132,38 @@ def send_audio_message(wa_id, media_id):
     response.raise_for_status()
     return response.json()
 
+def send_image_message(wa_id, media_id):
+    url = f"{GRAPH_URL}/{current_app.config['PHONE_NUMBER_ID']}/messages"
+    headers = {
+        "Authorization": f"Bearer {current_app.config['ACCESS_TOKEN']}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": wa_id,
+        "type": "image",
+        "image": {
+            "id": media_id
+        }
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+    response.raise_for_status()
+    return response.json()
+
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": wa_id,
+        "type": "audio",
+        "audio": {
+            "id": media_id,
+            "voice": True}
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+    response.raise_for_status()
+    return response.json()
+
 
 
 def upload_media(file_path):
@@ -150,6 +182,22 @@ def upload_media(file_path):
     media_id = response.json()["id"]
     return media_id
 
+def upload_image(file_path):
+    url = f"{GRAPH_URL}/{current_app.config['PHONE_NUMBER_ID']}/media"
+    headers = {"Authorization": f"Bearer {current_app.config['ACCESS_TOKEN']}"}
+    files = {
+        "file": (file_path, open(file_path, "rb"), "image/png"),
+    }
+    data = {
+        "messaging_product": "whatsapp",
+        "type": "image/png",
+    }
+
+    response = requests.post(url, headers=headers, files=files, data=data)
+    response.raise_for_status()
+    media_id = response.json()["id"]
+    return media_id
+
 def send_tts_message(wa_id, text):
     # 1. Convert text → speech
     filename = text_to_speech_converter(text, filename=f"tts_{wa_id}.mp3")
@@ -160,6 +208,25 @@ def send_tts_message(wa_id, text):
     # 3. Send voice message
     send_audio_message(wa_id, media_id)
 
+
+def send_image_message_wrapper(wa_id, picture_id=None, filename="picture.png"):
+    # 1. Do API call to get the image and save it in the docker
+    from PIL import Image
+    import requests
+    from io import BytesIO
+    url = "https://static.vecteezy.com/system/resources/previews/024/657/877/original/meteorologist-illustration-with-weather-forecast-and-atmospheric-precipitation-map-in-flat-cartoon-hand-drawn-landing-page-templates-vector.jpg"
+    response = requests.get(url)
+    img = Image.open(BytesIO(response.content))
+
+    with open(filename, 'wb') as out:
+        img.save(out, format="PNG")
+        print(f'Image was written to {filename}')
+
+    # 2. Upload image to WhatsApp Cloud API
+    media_id = upload_media(filename)
+
+    # 3. Send image message
+    send_image_message(wa_id, media_id)
 
 def get_interactive_menu_input(recipient, text, buttons_dict):
     """

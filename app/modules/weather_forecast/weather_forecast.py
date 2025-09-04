@@ -52,6 +52,8 @@ def handle_location_share(message):
     data = get_text_message_input(wa_id, reply)
     send_message(data)
 
+    send_image_message_wrapper(wa_id)
+
     # Send voice message
     send_tts_message(wa_id ,remove_emojis(reply))
 
